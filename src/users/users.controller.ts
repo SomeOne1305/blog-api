@@ -14,6 +14,8 @@ import {
   UseInterceptors,
   UploadedFile
 } from '@nestjs/common';
+import {ApiBody,ApiResponse, ApiBearerAuth, ApiTags} from '@nestjs/swagger'
+
 import { UsersService } from './users.service';
 import { AuthGuard } from './user.guard';
 import { EmailDto, UserDto } from './dto/user.dto';
@@ -25,9 +27,11 @@ interface Req extends Express.Request{
   user:ICookie
 }
 
+@ApiTags("Users")
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
+
 
   @HttpCode(200)
   @Get('/all')
@@ -35,6 +39,9 @@ export class UsersController {
     return this.userService.getAllUsers();
   }
 
+  @ApiBearerAuth("token")
+  @ApiResponse({status:200,description:"Return user data"})
+  @ApiResponse({status:403,description:"Unauthorized access to data"})
   @HttpCode(200)
   @Get('user')
   @UseGuards(AuthGuard)

@@ -3,9 +3,13 @@ import { BlogsService } from './blogs.service';
 import { BlogDto, CommentDto } from './dto/blog.dto';
 import { AuthGuard } from 'src/users/user.guard';
 import { Request } from 'express';
-import { ConfigService } from '@nestjs/config';
-import firebaseConfig from 'src/config/firebase.config';
+import { ICookie } from 'src/interfaces';
+import {ApiTags, ApiBearerAuth,ApiBody} from '@nestjs/swagger'
+interface IReq extends Request{
+  user:ICookie
+}
 
+@ApiTags("Blogs")
 @Controller('blogs')
 export class BlogsController {
   constructor(private readonly blogService:BlogsService
@@ -14,7 +18,6 @@ export class BlogsController {
   @HttpCode(200)
   @Get('/all')
   async getAll(){
-    console.log(firebaseConfig());
     
     return this.blogService.getAll()
   }
@@ -28,7 +31,7 @@ export class BlogsController {
   @HttpCode(200)
   @Get("/my-blogs")
   @UseGuards(AuthGuard)
-  async getById(@Req() req){
+  async getById(@Req() req:IReq){
     return this.blogService.getExactUserBlogs(req.user.userId)
   }
 
@@ -36,7 +39,7 @@ export class BlogsController {
   @Post('/create')
   @UsePipes(ValidationPipe)
   @UseGuards(AuthGuard)
-  async createBlog(@Body() dto:BlogDto,@Req() req){
+  async createBlog(@Body() dto:BlogDto,@Req() req:IReq){
 
     return this.blogService.createBlog(dto,req.user.userId)
   }
